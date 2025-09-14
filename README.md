@@ -1,5 +1,3 @@
-# my_portfolio
-HW 1
 
 # My first repo
 
