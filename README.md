@@ -1,9 +1,16 @@
 
-# My first repo
+# Billfish Analysis - Assignment 2
 
 ## Description
 
-Analysis of environmental data for EVR 628 course.
+Analysis of purse seine catch data of Bill fish. Data excluded fish 
+that could not be readily identified by species. Found the average 
+size for each species by year.
+
+## Column names
+
+year, month, species, latitude, longitude, size (cm) of fish, 
+number of fish
 
 ## Project Structure
 
