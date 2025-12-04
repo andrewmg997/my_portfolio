@@ -5,6 +5,8 @@ install.packages("dplyr")
 install.packages("readr")
 install.packages("ggplot_2")
 install.packages("patchwork")
+install.packages("rnaturalearth")
+install.packages("rnaturalearthdata")
 
 library(readxl)
 library(dplyr)
@@ -13,6 +15,10 @@ library(tidyverse)
 library(readr)
 library(ggplot2)
 library(patchwork)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggspatial)
 
 # read raw data
 
@@ -43,7 +49,7 @@ billfish_summary <- billfish_clean |>
     .groups = "drop"
   )
 
-# plot data
+# plot size over time data
 
 p1 <- ggplot(billfish_summary, aes(x = year, y = avg_size_cm, color = species)) +
   geom_line(linewidth = 1) +
@@ -64,6 +70,7 @@ p1 <- ggplot(billfish_summary, aes(x = year, y = avg_size_cm, color = species)) 
 
 saveRDS(billfish_summary, "data/processed/billfish_summary.rds")
 
+# plot average bill fish size species to compare with temporal data
 
 p2 <- ggplot(billfish_summary, aes(x = species, y = avg_size_cm, fill = species)) +
   geom_col() +
@@ -78,3 +85,23 @@ p2 <- ggplot(billfish_summary, aes(x = species, y = avg_size_cm, fill = species)
 # create paneled figure using patchwork package
 
 p1 / p2
+
+billfish_sf <- st_as_sf(billfish_clean,
+                        coords = c("lon", "lat"),
+                        crs = 4326)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot() +
+  geom_sf(data = world, fill = "black", color = "white") +
+  geom_sf(data = billfish_sf, aes(color = species), size = 1, alpha = 0.5) +
+  annotation_north_arrow(location = "tr", which_north = "true") +
+  annotation_scale(location = "bl") +
+  labs(
+    title = "Billfish Sampling Locations",
+    subtitle = "Locations of observed billfish species",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Species"
+  ) +
+  theme_light()

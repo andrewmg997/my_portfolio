@@ -20,6 +20,10 @@ number of fish
 - `scripts/`: R scripts for analysis
 - `results/`: Output figures and tables
 
+## Quarto Document Link
+
+- file:///C:/Users/andre/OneDrive/Desktop/my_portfolio/final_report.html#/title-slide
+
 ## Author
 
 [Andrew Gentile - amg9664@miami.edu]

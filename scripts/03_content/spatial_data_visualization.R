@@ -117,7 +117,7 @@ species <- c("BIL","BLM","BUM","MLS","SFA","SSP","SWO")
 species_colors <- viridis(7)    # give each species distinct color
 names(species_colors) <- c("BIL","BLM","BUM","MLS","SFA","SSP","SWO")
 
-layer_list <- lapply(species, function(sp) {  # allow for toggling between points
+layer_list <- lapply(species, function(sp) {
   mapview(
     billfish_sf |> filter(species == sp),
     layer.name = sp,

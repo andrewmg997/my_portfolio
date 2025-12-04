@@ -1,0 +1,147 @@
+---
+title: "Bill Fish Data Analysis"
+subtitle: "Spatial and Temporal Trends of Bill Fish Species"
+author: "Andrew Gentile"
+institute: Rosenstiel School of Marine, Atmospheric, and Earth Science
+format: 
+  revealjs:
+    theme: dark
+    slide-number: true 
+    message: false
+    warning: false
+    scroll: true
+---
+
+
+
+```{r}
+library(readxl)
+library(dplyr)
+library(janitor)
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(mapview)
+library(viridis)
+```
+```{r}
+setwd("..")
+```
+
+
+
+```{r}
+billfish_raw <- read_csv("data/raw/BillfishData.csv", show_col_types = FALSE)
+
+billfish_clean <- billfish_raw |>
+  rename(
+    year = Year,
+    month = Month,
+    species = Species,
+    lat = LatC1,
+    lon = LonC1,
+    size_cm = SizeCm,
+    num_fish = NumFish)
+
+billfish_summary <- billfish_clean |>
+  filter(species != "BIL") |>              # remove BIL
+  group_by(year, species) |>               # group by year and species
+  summarise(
+    avg_size_cm = weighted.mean(size_cm, num_fish, na.rm = TRUE),
+    total_fish = sum(num_fish, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+p1 <- ggplot(billfish_summary, aes(x = year, y = avg_size_cm, color = species)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Average Billfish Size Over Time (Weighted by Number of Fish)",
+    x = "Year",
+    y = "Average Size (cm)",
+    color = "Species"
+  ) +
+  theme_dark()
+
+p2 <- ggplot(billfish_summary, aes(x = species, y = avg_size_cm, fill = species)) +
+  geom_col() +
+  labs(
+    title = "Average Billfish Size by Species",
+    x = "Species",
+    y = "Average Size (cm)",
+    fill = "Species"
+  ) +
+  theme_dark()
+
+ggsave(
+  filename = "results/img/billfish_avg_size_over_time.png",
+  plot = p1,
+  width = 8,      # width in inches
+  height = 5,     # height in inches
+  dpi = 300       # resolution
+)
+
+# Save the second plot (average size by species)
+ggsave(
+  filename = "results/img/billfish_avg_size_by_species.png",
+  plot = p2,
+  width = 6,
+  height = 5,
+  dpi = 300
+)
+
+```
+
+
+
+# Introduction
+- In this data analysis, I looked at 6 different bill fish species caught in purse seines from 1990 to 2024 in the Eastern Pacific Ocean. With this data, I found average the average size of these bill fish caught over time, as well as average bill fish size by each species. I also compiled a map to show the distribution of each species, where they were found, and in what year along with their size.
+
+# Objective
+- The goal of this project was to get a better understanding of cleaning, extrapolating, and presenting quantitative information from field research in order to improve how to better process data. This was also to better familiarize myself with the bridge between hard data and data visualization as someone with a future career in environmental policy. Being able to translate bill fish size both temporally and by species aided in this goal.
+
+# Data Sources
+- Link to website: [IATTC](https://www.iattc.org/en-US/Data/Public-domain)
+- Data zip file: [Billfish size measurements made by observers aboard purse-seine vessels in the EPO](PublicSizePSBillfish.zip)
+
+# Data Processing
+- Using tidyverse and other packages, I was able to clean the data in a way that was convenient for my analysis. This allowed me to find the average weights of the fish species, remove BIL from the data, group by, and get rid of any NA's among other useful tactics to make the data more readable and user friendly. To make the data even more digestible, I also created an interactive map with the help of rnaturalearth and mapview.
+
+# Main Findings
+
+## Average Size Over Time
+
+![](results/img/billfish_avg_size_over_time.png){fig-alt="Average Billfish Size Over Time" width="65%"}
+
+## Average Size by Species
+
+![](results/img/billfish_avg_size_by_species.png){fig-alt="Average Billfish Size by Species" width="65%"}
+
+## Main Findings
+- Average bill fish size significantly decreased after the first fishing and remained stabilized for the remainder of the recordings with slight flunctuations between recorded fishing years
+
+The largest average billfish size observed is `r max(billfish_summary$avg_size_cm)` cm.
+
+The year with the highest total number of fish observed is `r billfish_summary$year[which.max(billfish_summary$total_fish)]`.
+
+# References
+
+**Data Sources**  
+- Billfish dataset: BillfishData.csv
+- Spatial data: Natural Earth (medium scale), via the rnaturalearth R package  
+
+**Software / Tools**  
+- readxl – read Excel files  
+- dplyr – manipulate data
+- janitor – clean data
+- tidyverse – various packages
+- readr – read CSV files
+- ggplot2 – plot
+- sf – handle spatial data
+- rnaturalearth / rnaturalearthdata – base map data  
+- mapview – make interactive maps 
+- viridis – color for maps 
+
